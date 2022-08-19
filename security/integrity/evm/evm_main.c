@@ -807,6 +807,36 @@ void evm_inode_post_setxattr(struct dentry *dentry, const char *xattr_name,
 }
 
 /**
+ * evm_inode_post_set_acl - update 'security.evm' to reflect the changes
+ * @dentry: pointer to the affected dentry
+ * @acl_name: name of the posix acl
+ *
+ * Update the HMAC stored in 'security.evm' to reflect the change.
+ *
+ * No need to take the i_mutex lock here, as this function is called from
+ * vfs_set_acl().  The caller of which has taken the inode's
+ * i_mutex lock.
+ */
+void evm_inode_post_set_acl(struct dentry *dentry, const char *acl_name)
+{
+	if (!evm_revalidate_status(acl_name))
+		return;
+
+	evm_reset_status(dentry->d_inode);
+
+	if (!(evm_initialized & EVM_INIT_HMAC))
+		return;
+
+	/* This only cares about the values of security.* xattrs. The raw
+	 * values for posix should never be operated on. The only time it is ok
+	 * to operate on posix acls is when the VFS has already interpreted
+	 * them correctly and has passed them down as struct posix_acl.
+	 * But since evm_update_evmxattr() doesn't operate on the value for
+	 * posix acls it's enough to just pass NULL for now. */
+	evm_update_evmxattr(dentry, acl_name, NULL, 0);
+}
+
+/**
  * evm_inode_post_removexattr - update 'security.evm' after removing the xattr
  * @dentry: pointer to the affected dentry
  * @xattr_name: pointer to the affected extended attribute name
