@@ -2915,7 +2915,7 @@ CIFSSMB_set_compression(const unsigned int xid, struct cifs_tcon *tcon,
 #ifdef CONFIG_CIFS_POSIX
 
 /*Convert an Access Control Entry from wire format to local POSIX xattr format*/
-static void cifs_convert_ace(struct posix_acl_xattr_entry *ace,
+static void cifs_convert_ace_legacy(struct posix_acl_xattr_entry *ace,
 			     struct cifs_posix_ace *cifs_ace)
 {
 	/* u8 cifs fields do not need le conversion */
@@ -2931,8 +2931,9 @@ static void cifs_convert_ace(struct posix_acl_xattr_entry *ace,
 }
 
 /* Convert ACL from CIFS POSIX wire format to local Linux POSIX ACL xattr */
-static int cifs_copy_posix_acl(char *trgt, char *src, const int buflen,
-			       const int acl_type, const int size_of_data_area)
+static int cifs_copy_posix_acl_legacy(char *trgt, char *src, const int buflen,
+				      const int acl_type,
+				      const int size_of_data_area)
 {
 	int size =  0;
 	int i;
@@ -2981,7 +2982,7 @@ static int cifs_copy_posix_acl(char *trgt, char *src, const int buflen,
 
 		local_acl->a_version = cpu_to_le32(POSIX_ACL_XATTR_VERSION);
 		for (i = 0; i < count ; i++) {
-			cifs_convert_ace(&ace[i], pACE);
+			cifs_convert_ace_legacy(&ace[i], pACE);
 			pACE++;
 		}
 	}
@@ -3049,7 +3050,7 @@ static __u16 ACL_to_cifs_posix(char *parm_data, const char *pACL,
 }
 
 int
-CIFSSMBGetPosixACL(const unsigned int xid, struct cifs_tcon *tcon,
+CIFSSMBGetPosixACLLegacy(const unsigned int xid, struct cifs_tcon *tcon,
 		   const unsigned char *searchName,
 		   char *acl_inf, const int buflen, const int acl_type,
 		   const struct nls_table *nls_codepage, int remap)
@@ -3124,7 +3125,7 @@ queryAclRetry:
 		else {
 			__u16 data_offset = le16_to_cpu(pSMBr->t2.DataOffset);
 			__u16 count = le16_to_cpu(pSMBr->t2.DataCount);
-			rc = cifs_copy_posix_acl(acl_inf,
+			rc = cifs_copy_posix_acl_legacy(acl_inf,
 				(char *)&pSMBr->hdr.Protocol+data_offset,
 				buflen, acl_type, count);
 		}

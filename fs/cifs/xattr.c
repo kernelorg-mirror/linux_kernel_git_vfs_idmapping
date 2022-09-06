@@ -370,7 +370,7 @@ static int cifs_xattr_get(const struct xattr_handler *handler,
 	case XATTR_ACL_ACCESS:
 #ifdef CONFIG_CIFS_POSIX
 		if (sb->s_flags & SB_POSIXACL)
-			rc = CIFSSMBGetPosixACL(xid, pTcon, full_path,
+			rc = CIFSSMBGetPosixACLLegacy(xid, pTcon, full_path,
 				value, size, ACL_TYPE_ACCESS,
 				cifs_sb->local_nls,
 				cifs_remap(cifs_sb));
@@ -380,7 +380,7 @@ static int cifs_xattr_get(const struct xattr_handler *handler,
 	case XATTR_ACL_DEFAULT:
 #ifdef CONFIG_CIFS_POSIX
 		if (sb->s_flags & SB_POSIXACL)
-			rc = CIFSSMBGetPosixACL(xid, pTcon, full_path,
+			rc = CIFSSMBGetPosixACLLegacy(xid, pTcon, full_path,
 				value, size, ACL_TYPE_DEFAULT,
 				cifs_sb->local_nls,
 				cifs_remap(cifs_sb));
