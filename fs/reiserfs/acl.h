@@ -49,6 +49,12 @@ static inline int reiserfs_acl_count(size_t size)
 
 #ifdef CONFIG_REISERFS_FS_POSIX_ACL
 struct posix_acl *reiserfs_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+reiserfs_get_dentry_acl(struct user_namespace *mnt_userns,
+			struct dentry *dentry, int type)
+{
+	return reiserfs_get_acl(d_inode(dentry), type, false);
+}
 int reiserfs_set_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 		     struct posix_acl *acl, int type);
 int reiserfs_acl_chmod(struct dentry *dentry);
@@ -60,8 +66,9 @@ int reiserfs_cache_default_acl(struct inode *dir);
 #else
 
 #define reiserfs_cache_default_acl(inode) 0
-#define reiserfs_get_acl NULL
-#define reiserfs_set_acl NULL
+#define reiserfs_get_acl	NULL
+#define reiserfs_get_dentry_acl NULL
+#define reiserfs_set_acl	NULL
 
 static inline int reiserfs_acl_chmod(struct dentry *dentry)
 {

@@ -28,6 +28,12 @@ struct jffs2_acl_header {
 #ifdef CONFIG_JFFS2_FS_POSIX_ACL
 
 struct posix_acl *jffs2_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+jffs2_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		     int type)
+{
+	return jffs2_get_acl(d_inode(dentry), type, false);
+}
 int jffs2_set_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 		  struct posix_acl *acl, int type);
 extern int jffs2_init_acl_pre(struct inode *, struct inode *, umode_t *);
@@ -36,6 +42,7 @@ extern int jffs2_init_acl_post(struct inode *);
 #else
 
 #define jffs2_get_acl				(NULL)
+#define jffs2_get_dentry_acl			(NULL)
 #define jffs2_set_acl				(NULL)
 #define jffs2_init_acl_pre(dir_i,inode,mode)	(0)
 #define jffs2_init_acl_post(inode)		(0)

@@ -17,6 +17,12 @@ struct ocfs2_acl_entry {
 };
 
 struct posix_acl *ocfs2_iop_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+ocfs2_iop_get_dentry_acl(struct user_namespace *mnt_userns,
+			 struct dentry *dentry, int type)
+{
+	return ocfs2_iop_get_acl(d_inode(dentry), type, false);
+}
 int ocfs2_iop_set_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 		      struct posix_acl *acl, int type);
 extern int ocfs2_acl_chmod(struct inode *, struct buffer_head *);

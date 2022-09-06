@@ -843,13 +843,20 @@ int ntfs_cmp_names_cpu(const struct cpu_str *uni1, const struct le_str *uni2,
 /* globals from xattr.c */
 #ifdef CONFIG_NTFS3_FS_POSIX_ACL
 struct posix_acl *ntfs_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+ntfs_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		    int type)
+{
+	return ntfs_get_acl(d_inode(dentry), type, false);
+}
 int ntfs_set_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 		 struct posix_acl *acl, int type);
 int ntfs_init_acl(struct user_namespace *mnt_userns, struct inode *inode,
 		  struct inode *dir);
 #else
-#define ntfs_get_acl NULL
-#define ntfs_set_acl NULL
+#define ntfs_get_acl		NULL
+#define ntfs_get_dentry_acl	NULL
+#define ntfs_set_acl		NULL
 #endif
 
 int ntfs_acl_chmod(struct user_namespace *mnt_userns, struct dentry *dentry);

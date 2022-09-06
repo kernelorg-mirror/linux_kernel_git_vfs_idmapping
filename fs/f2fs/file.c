@@ -999,6 +999,7 @@ int f2fs_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
 const struct inode_operations f2fs_file_inode_operations = {
 	.getattr	= f2fs_getattr,
 	.setattr	= f2fs_setattr,
+	.get_dentry_acl	= f2fs_get_dentry_acl,
 	.get_acl	= f2fs_get_acl,
 	.set_acl	= f2fs_set_acl,
 	.listxattr	= f2fs_listxattr,

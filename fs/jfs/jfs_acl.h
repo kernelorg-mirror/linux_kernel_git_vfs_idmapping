@@ -8,6 +8,12 @@
 #ifdef CONFIG_JFS_POSIX_ACL
 
 struct posix_acl *jfs_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+jfs_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		   int type)
+{
+	return jfs_get_acl(d_inode(dentry), type, false);
+}
 int jfs_set_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 		struct posix_acl *acl, int type);
 int jfs_init_acl(tid_t, struct inode *, struct inode *);

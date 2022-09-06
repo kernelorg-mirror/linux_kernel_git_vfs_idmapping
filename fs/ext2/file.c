@@ -200,6 +200,7 @@ const struct inode_operations ext2_file_inode_operations = {
 	.listxattr	= ext2_listxattr,
 	.getattr	= ext2_getattr,
 	.setattr	= ext2_setattr,
+	.get_dentry_acl	= ext2_get_dentry_acl,
 	.get_acl	= ext2_get_acl,
 	.set_acl	= ext2_set_acl,
 	.fiemap		= ext2_fiemap,

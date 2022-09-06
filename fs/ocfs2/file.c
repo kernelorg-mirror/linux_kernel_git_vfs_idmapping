@@ -2712,6 +2712,7 @@ const struct inode_operations ocfs2_file_iops = {
 	.permission	= ocfs2_permission,
 	.listxattr	= ocfs2_listxattr,
 	.fiemap		= ocfs2_fiemap,
+	.get_dentry_acl	= ocfs2_iop_get_dentry_acl,
 	.get_acl	= ocfs2_iop_get_acl,
 	.set_acl	= ocfs2_iop_set_acl,
 	.fileattr_get	= ocfs2_fileattr_get,
@@ -2722,6 +2723,7 @@ const struct inode_operations ocfs2_special_file_iops = {
 	.setattr	= ocfs2_setattr,
 	.getattr	= ocfs2_getattr,
 	.permission	= ocfs2_permission,
+	.get_dentry_acl	= ocfs2_iop_get_dentry_acl,
 	.get_acl	= ocfs2_iop_get_acl,
 	.set_acl	= ocfs2_iop_set_acl,
 };

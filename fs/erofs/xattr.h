@@ -81,8 +81,15 @@ static inline int erofs_getxattr(struct inode *inode, int index,
 
 #ifdef CONFIG_EROFS_FS_POSIX_ACL
 struct posix_acl *erofs_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+erofs_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		     int type)
+{
+	return erofs_get_acl(d_inode(dentry), type, false);
+}
 #else
 #define erofs_get_acl	(NULL)
+#define erofs_get_dentry_acl	(NULL)
 #endif
 
 #endif

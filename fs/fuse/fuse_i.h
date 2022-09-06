@@ -1266,6 +1266,12 @@ extern const struct xattr_handler *fuse_no_acl_xattr_handlers[];
 
 struct posix_acl;
 struct posix_acl *fuse_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+fuse_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		    int type)
+{
+	return fuse_get_acl(d_inode(dentry), type, false);
+}
 int fuse_set_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 		 struct posix_acl *acl, int type);
 

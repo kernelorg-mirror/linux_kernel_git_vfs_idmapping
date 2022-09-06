@@ -53,19 +53,20 @@ const struct file_operations jffs2_dir_operations =
 
 const struct inode_operations jffs2_dir_inode_operations =
 {
-	.create =	jffs2_create,
-	.lookup =	jffs2_lookup,
-	.link =		jffs2_link,
-	.unlink =	jffs2_unlink,
-	.symlink =	jffs2_symlink,
-	.mkdir =	jffs2_mkdir,
-	.rmdir =	jffs2_rmdir,
-	.mknod =	jffs2_mknod,
-	.rename =	jffs2_rename,
-	.get_acl =	jffs2_get_acl,
-	.set_acl =	jffs2_set_acl,
-	.setattr =	jffs2_setattr,
-	.listxattr =	jffs2_listxattr,
+	.create =		jffs2_create,
+	.lookup =		jffs2_lookup,
+	.link =			jffs2_link,
+	.unlink =		jffs2_unlink,
+	.symlink =		jffs2_symlink,
+	.mkdir =		jffs2_mkdir,
+	.rmdir =		jffs2_rmdir,
+	.mknod =		jffs2_mknod,
+	.rename =		jffs2_rename,
+	.get_dentry_acl =	jffs2_get_dentry_acl,
+	.get_acl =		jffs2_get_acl,
+	.set_acl =		jffs2_set_acl,
+	.setattr =		jffs2_setattr,
+	.listxattr =		jffs2_listxattr,
 };
 
 /***********************************************************************/

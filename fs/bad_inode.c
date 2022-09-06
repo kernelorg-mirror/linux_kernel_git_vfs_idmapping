@@ -126,6 +126,13 @@ static struct posix_acl *bad_inode_get_acl(struct inode *inode, int type, bool r
 	return ERR_PTR(-EIO);
 }
 
+static struct posix_acl *
+bad_inode_get_dentry_acl(struct user_namespace *mnt_userns,
+			 struct dentry *dentry, int type)
+{
+	return ERR_PTR(-EIO);
+}
+
 static int bad_inode_fiemap(struct inode *inode,
 			    struct fiemap_extent_info *fieinfo, u64 start,
 			    u64 len)
@@ -182,6 +189,7 @@ static const struct inode_operations bad_inode_ops =
 	.update_time	= bad_inode_update_time,
 	.atomic_open	= bad_inode_atomic_open,
 	.tmpfile	= bad_inode_tmpfile,
+	.get_dentry_acl	= bad_inode_get_dentry_acl,
 	.set_acl	= bad_inode_set_acl,
 };
 

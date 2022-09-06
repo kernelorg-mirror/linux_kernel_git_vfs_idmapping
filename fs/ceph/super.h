@@ -1116,6 +1116,12 @@ void ceph_release_acl_sec_ctx(struct ceph_acl_sec_ctx *as_ctx);
 #ifdef CONFIG_CEPH_FS_POSIX_ACL
 
 struct posix_acl *ceph_get_acl(struct inode *, int, bool);
+static inline struct posix_acl *
+ceph_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		    int type)
+{
+	return ceph_get_acl(d_inode(dentry), type, false);
+}
 int ceph_set_acl(struct user_namespace *mnt_userns,
 		 struct dentry *dentry, struct posix_acl *acl, int type);
 int ceph_pre_init_acls(struct inode *dir, umode_t *mode,
@@ -1131,6 +1137,7 @@ static inline void ceph_forget_all_cached_acls(struct inode *inode)
 #else
 
 #define ceph_get_acl NULL
+#define ceph_get_dentry_acl NULL
 #define ceph_set_acl NULL
 
 static inline int ceph_pre_init_acls(struct inode *dir, umode_t *mode,

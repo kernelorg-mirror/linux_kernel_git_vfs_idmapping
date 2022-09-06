@@ -379,6 +379,7 @@ int erofs_getattr(struct user_namespace *mnt_userns, const struct path *path,
 const struct inode_operations erofs_generic_iops = {
 	.getattr = erofs_getattr,
 	.listxattr = erofs_listxattr,
+	.get_dentry_acl = erofs_get_dentry_acl,
 	.get_acl = erofs_get_acl,
 	.fiemap = erofs_fiemap,
 };
@@ -387,6 +388,7 @@ const struct inode_operations erofs_symlink_iops = {
 	.get_link = page_get_link,
 	.getattr = erofs_getattr,
 	.listxattr = erofs_listxattr,
+	.get_dentry_acl = erofs_get_dentry_acl,
 	.get_acl = erofs_get_acl,
 };
 
@@ -394,5 +396,6 @@ const struct inode_operations erofs_fast_symlink_iops = {
 	.get_link = simple_get_link,
 	.getattr = erofs_getattr,
 	.listxattr = erofs_listxattr,
+	.get_dentry_acl = erofs_get_dentry_acl,
 	.get_acl = erofs_get_acl,
 };

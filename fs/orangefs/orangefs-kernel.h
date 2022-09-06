@@ -106,6 +106,12 @@ enum orangefs_vfs_op_states {
 extern const struct xattr_handler *orangefs_xattr_handlers[];
 
 extern struct posix_acl *orangefs_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+orangefs_get_dentry_acl(struct user_namespace *mnt_userns,
+			struct dentry *dentry, int type)
+{
+	return orangefs_get_acl(d_inode(dentry), type, false);
+}
 extern int orangefs_set_acl(struct user_namespace *mnt_userns,
 			    struct dentry *dentry, struct posix_acl *acl,
 			    int type);

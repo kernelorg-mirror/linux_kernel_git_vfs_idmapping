@@ -2033,6 +2033,7 @@ const struct inode_operations ceph_dir_iops = {
 	.getattr = ceph_getattr,
 	.setattr = ceph_setattr,
 	.listxattr = ceph_listxattr,
+	.get_dentry_acl = ceph_get_dentry_acl,
 	.get_acl = ceph_get_acl,
 	.set_acl = ceph_set_acl,
 	.mknod = ceph_mknod,

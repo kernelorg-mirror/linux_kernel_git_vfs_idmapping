@@ -56,14 +56,21 @@ static inline int ext4_acl_count(size_t size)
 
 /* acl.c */
 struct posix_acl *ext4_get_acl(struct inode *inode, int type, bool rcu);
+static inline struct posix_acl *
+ext4_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		    int type)
+{
+	return ext4_get_acl(d_inode(dentry), type, false);
+}
 int ext4_set_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 		 struct posix_acl *acl, int type);
 extern int ext4_init_acl(handle_t *, struct inode *, struct inode *);
 
 #else  /* CONFIG_EXT4_FS_POSIX_ACL */
 #include <linux/sched.h>
-#define ext4_get_acl NULL
-#define ext4_set_acl NULL
+#define ext4_get_acl		NULL
+#define ext4_get_dentry_acl	NULL
+#define ext4_set_acl		NULL
 
 static inline int
 ext4_init_acl(handle_t *handle, struct inode *inode, struct inode *dir)

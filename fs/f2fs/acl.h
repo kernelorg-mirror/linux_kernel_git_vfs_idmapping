@@ -34,13 +34,20 @@ struct f2fs_acl_header {
 #ifdef CONFIG_F2FS_FS_POSIX_ACL
 
 extern struct posix_acl *f2fs_get_acl(struct inode *, int, bool);
+static inline struct posix_acl *
+f2fs_get_dentry_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
+		    int type)
+{
+	return f2fs_get_acl(d_inode(dentry), type, false);
+}
 extern int f2fs_set_acl(struct user_namespace *, struct dentry *,
 			struct posix_acl *, int);
 extern int f2fs_init_acl(struct inode *, struct inode *, struct page *,
 							struct page *);
 #else
-#define f2fs_get_acl	NULL
-#define f2fs_set_acl	NULL
+#define f2fs_get_acl		NULL
+#define f2fs_get_dentry_acl	NULL
+#define f2fs_set_acl		NULL
 
 static inline int f2fs_init_acl(struct inode *inode, struct inode *dir,
 				struct page *ipage, struct page *dpage)
