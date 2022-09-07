@@ -1129,6 +1129,7 @@ const struct inode_operations cifs_dir_inode_ops = {
 	.mknod   = cifs_mknod,
 	.listxattr = cifs_listxattr,
 	.get_dentry_acl = cifs_get_dentry_acl,
+	.set_acl = cifs_set_acl,
 };
 
 const struct inode_operations cifs_file_inode_ops = {
@@ -1138,6 +1139,7 @@ const struct inode_operations cifs_file_inode_ops = {
 	.listxattr = cifs_listxattr,
 	.fiemap = cifs_fiemap,
 	.get_dentry_acl = cifs_get_dentry_acl,
+	.set_acl = cifs_set_acl,
 };
 
 const struct inode_operations cifs_symlink_inode_ops = {
