@@ -548,7 +548,7 @@ extern int cifs_get_acl(const unsigned int xid, struct cifs_tcon *tcon,
 			const unsigned char *searchName, struct posix_acl **acl,
 			const int acl_type,
 			const struct nls_table *nls_codepage, int remap);
-extern int CIFSSMBSetPosixACL(const unsigned int xid, struct cifs_tcon *tcon,
+extern int CIFSSMBSetPosixACLLegacy(const unsigned int xid, struct cifs_tcon *tcon,
 		const unsigned char *fileName,
 		const char *local_acl, const int buflen, const int acl_type,
 		const struct nls_table *nls_codepage, int remap_special_chars);
