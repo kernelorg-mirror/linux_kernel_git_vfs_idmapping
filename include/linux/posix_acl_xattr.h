@@ -33,27 +33,10 @@ posix_acl_xattr_count(size_t size)
 }
 
 #ifdef CONFIG_FS_POSIX_ACL
-void posix_acl_fix_xattr_from_user(void *value, size_t size);
-void posix_acl_fix_xattr_to_user(void *value, size_t size);
-void posix_acl_getxattr_idmapped_mnt(struct user_namespace *mnt_userns,
-				     const struct inode *inode,
-				     void *value, size_t size);
 ssize_t vfs_posix_acl_to_xattr(struct user_namespace *mnt_userns,
 			       struct inode *inode, const struct posix_acl *acl,
 			       void *buffer, size_t size);
 #else
-static inline void posix_acl_fix_xattr_from_user(void *value, size_t size)
-{
-}
-static inline void posix_acl_fix_xattr_to_user(void *value, size_t size)
-{
-}
-static inline void
-posix_acl_getxattr_idmapped_mnt(struct user_namespace *mnt_userns,
-				const struct inode *inode, void *value,
-				size_t size)
-{
-}
 static inline ssize_t vfs_posix_acl_to_xattr(struct user_namespace *mnt_userns,
 					     struct inode *inode,
 					     const struct posix_acl *acl,

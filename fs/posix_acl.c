@@ -757,92 +757,6 @@ static int posix_acl_fix_xattr_common(const void *value, size_t size)
 	return count;
 }
 
-void posix_acl_getxattr_idmapped_mnt(struct user_namespace *mnt_userns,
-				     const struct inode *inode,
-				     void *value, size_t size)
-{
-	struct posix_acl_xattr_header *header = value;
-	struct posix_acl_xattr_entry *entry = (void *)(header + 1), *end;
-	struct user_namespace *fs_userns = i_user_ns(inode);
-	int count;
-	vfsuid_t vfsuid;
-	vfsgid_t vfsgid;
-	kuid_t uid;
-	kgid_t gid;
-
-	if (no_idmapping(mnt_userns, i_user_ns(inode)))
-		return;
-
-	count = posix_acl_fix_xattr_common(value, size);
-	if (count <= 0)
-		return;
-
-	for (end = entry + count; entry != end; entry++) {
-		switch (le16_to_cpu(entry->e_tag)) {
-		case ACL_USER:
-			uid = make_kuid(&init_user_ns, le32_to_cpu(entry->e_id));
-			vfsuid = make_vfsuid(mnt_userns, fs_userns, uid);
-			entry->e_id = cpu_to_le32(from_kuid(&init_user_ns,
-						vfsuid_into_kuid(vfsuid)));
-			break;
-		case ACL_GROUP:
-			gid = make_kgid(&init_user_ns, le32_to_cpu(entry->e_id));
-			vfsgid = make_vfsgid(mnt_userns, fs_userns, gid);
-			entry->e_id = cpu_to_le32(from_kgid(&init_user_ns,
-						vfsgid_into_kgid(vfsgid)));
-			break;
-		default:
-			break;
-		}
-	}
-}
-
-static void posix_acl_fix_xattr_userns(
-	struct user_namespace *to, struct user_namespace *from,
-	void *value, size_t size)
-{
-	struct posix_acl_xattr_header *header = value;
-	struct posix_acl_xattr_entry *entry = (void *)(header + 1), *end;
-	int count;
-	kuid_t uid;
-	kgid_t gid;
-
-	count = posix_acl_fix_xattr_common(value, size);
-	if (count <= 0)
-		return;
-
-	for (end = entry + count; entry != end; entry++) {
-		switch(le16_to_cpu(entry->e_tag)) {
-		case ACL_USER:
-			uid = make_kuid(from, le32_to_cpu(entry->e_id));
-			entry->e_id = cpu_to_le32(from_kuid(to, uid));
-			break;
-		case ACL_GROUP:
-			gid = make_kgid(from, le32_to_cpu(entry->e_id));
-			entry->e_id = cpu_to_le32(from_kgid(to, gid));
-			break;
-		default:
-			break;
-		}
-	}
-}
-
-void posix_acl_fix_xattr_from_user(void *value, size_t size)
-{
-	struct user_namespace *user_ns = current_user_ns();
-	if (user_ns == &init_user_ns)
-		return;
-	posix_acl_fix_xattr_userns(&init_user_ns, user_ns, value, size);
-}
-
-void posix_acl_fix_xattr_to_user(void *value, size_t size)
-{
-	struct user_namespace *user_ns = current_user_ns();
-	if (user_ns == &init_user_ns)
-		return;
-	posix_acl_fix_xattr_userns(user_ns, &init_user_ns, value, size);
-}
-
 /**
  * make_posix_acl - convert POSIX ACLs from uapi to VFS format using the
  *                  provided callbacks to map ACL_{GROUP,USER} entries into the
@@ -1199,31 +1113,6 @@ ssize_t vfs_posix_acl_to_xattr(struct user_namespace *mnt_userns,
 	return real_size;
 }
 
-static int
-posix_acl_xattr_get(const struct xattr_handler *handler,
-		    struct dentry *unused, struct inode *inode,
-		    const char *name, void *value, size_t size)
-{
-	struct posix_acl *acl;
-	int error;
-
-	if (!IS_POSIXACL(inode))
-		return -EOPNOTSUPP;
-	if (S_ISLNK(inode->i_mode))
-		return -EOPNOTSUPP;
-
-	acl = get_acl(inode, handler->flags);
-	if (IS_ERR(acl))
-		return PTR_ERR(acl);
-	if (acl == NULL)
-		return -ENODATA;
-
-	error = posix_acl_to_xattr(&init_user_ns, acl, value, size);
-	posix_acl_release(acl);
-
-	return error;
-}
-
 int
 set_posix_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 	      int type, struct posix_acl *acl)
@@ -1249,36 +1138,6 @@ set_posix_acl(struct user_namespace *mnt_userns, struct dentry *dentry,
 }
 EXPORT_SYMBOL(set_posix_acl);
 
-static int
-posix_acl_xattr_set(const struct xattr_handler *handler,
-			   struct user_namespace *mnt_userns,
-			   struct dentry *dentry, struct inode *inode,
-			   const char *name, const void *value, size_t size,
-			   int flags)
-{
-	struct posix_acl *acl = NULL;
-	int ret;
-
-	if (value) {
-		/*
-		 * By the time we end up here the {g,u}ids stored in
-		 * ACL_{GROUP,USER} have already been mapped according to the
-		 * caller's idmapping. The vfs_set_acl_prepare() helper will
-		 * recover them and take idmapped mounts into account. The
-		 * filesystem will receive the POSIX ACLs in in the correct
-		 * format ready to be cached or written to the backing store
-		 * taking the filesystem idmapping into account.
-		 */
-		acl = vfs_set_acl_prepare(mnt_userns, i_user_ns(inode),
-					  value, size);
-		if (IS_ERR(acl))
-			return PTR_ERR(acl);
-	}
-	ret = set_posix_acl(mnt_userns, dentry, handler->flags, acl);
-	posix_acl_release(acl);
-	return ret;
-}
-
 static bool
 posix_acl_xattr_list(struct dentry *dentry)
 {
@@ -1289,8 +1148,6 @@ const struct xattr_handler posix_acl_access_xattr_handler = {
 	.name = XATTR_NAME_POSIX_ACL_ACCESS,
 	.flags = ACL_TYPE_ACCESS,
 	.list = posix_acl_xattr_list,
-	.get = posix_acl_xattr_get,
-	.set = posix_acl_xattr_set,
 };
 EXPORT_SYMBOL_GPL(posix_acl_access_xattr_handler);
 
@@ -1298,8 +1155,6 @@ const struct xattr_handler posix_acl_default_xattr_handler = {
 	.name = XATTR_NAME_POSIX_ACL_DEFAULT,
 	.flags = ACL_TYPE_DEFAULT,
 	.list = posix_acl_xattr_list,
-	.get = posix_acl_xattr_get,
-	.set = posix_acl_xattr_set,
 };
 EXPORT_SYMBOL_GPL(posix_acl_default_xattr_handler);
 
